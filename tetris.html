@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <link rel="stylesheet" src="blockrain.css">
+  <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+  <script src="blockrain.jquery.min.js"></script>
+</head>
+
+<body>
+  <div class="game" style="width:300px; height:600px;"></div>
+</body>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('.game').blockrain({
+      autoplay: true,
+      autoplayRestart: true,
+      theme: "candy",
+      speed: 0
+    });
+  });
+</script>
+
+<style>
+
+</style>
+
+</html>
