@@ -9,6 +9,7 @@
 
 <body>
   <div class="game" style="width:300px; height:600px;"></div>
+  <h1>Generation: <span id="gen"></span> </h1>
   <h1>Holes: <span id="holes"></span> </h1>
   <h1>Blockades: <span id="blockades"></span> </h1>
   <h1>Walls: <span id="walls"></span> </h1>
@@ -24,25 +25,142 @@
     });
   });
 
-  function individual() {
+  var min = -10;
+  var max = -1*min;
 
+  var POP_IDX = 0;
+  var ALL_DATA = [];
+  var DATA = [];
+
+  var POP_LENGTH = 6;
+  var NUM_GEN = 10;
+  var F_H = [];
+
+  // Create first population randomly
+  makePop();
+
+  function makePop() {
+    var p = population(POP_LENGTH,3);
+    for(var i=0;i<POP_LENGTH;i++){
+      DATA.push({"id":i,"weights":p[i]});
+    }
   }
 
-  function population() {
+  function finishEvolution() {
+    var retain = 0.5;
+    var random_select = 0.05;
+    var mutate = 0.05;
+    var num_generations = 10;
+    var pop_size = POP_LENGTH;
 
+    p = []
+    for (var i=0;i<POP_LENGTH;i++) {
+      p.push(DATA[i].weights)
+    }
+
+    var pop_grade = parseInt(grade(p));
+    F_H.push(pop_grade);
+    $("#gen").html(F_H.length);
+    p = evolve(p,retain,random_select,mutate);
+
+    // Reset
+    POP_IDX = 0;
+    ALL_DATA.push(DATA);
+    DATA = [];
+    for(var i=0;i<POP_LENGTH;i++){
+      DATA.push({"id":i,"weights":p[i]});
+    }
+
+    return pop_grade;
   }
 
-  function fitness(individual) {
+  function randint(min_val, max_val) {
+    return Math.floor(Math.random() * (max_val - min_val + 1) + min_val);
+  }
+  function individual(num_features) {
+    var features = [];
 
+    for(var i = 0; i < num_features; i++) {
+      features.push(Math.random() * (max - min) + min);
+    }
+    return features;
   }
 
-  function grade() {
-
+  function population(count,length) {
+    arr = [];
+    for (var i =0; i < count; i++) {
+      arr.push(individual(length,3))
+    }
+    return arr;
   }
 
-  function evolve() {
-
+  function fitness(id){
+    return DATA[id].score;
   }
+
+  function grade(pop) {
+      var sum = 0;
+      for (var i = 0; i < pop.length;i++) {
+        sum += DATA[i].score
+      }
+      return sum/pop.length;
+  }
+
+  function evolve(pop,retain,random_select,mutate) {
+      var graded = [];
+      for (var x=0; x<pop.length;x++){
+          graded.push([ fitness(x),pop[x] ]);
+      }
+
+      graded = graded.sort(function(a, b){return b[0]-a[0]});
+      for (var i=0;i<graded.length;i++){
+        graded[i] = graded[i][1];
+      }
+
+      var retain_length = Math.floor(graded.length * retain);
+      var parents = [];
+      for (var i=0;i < retain_length; i++) {
+        parents.push(graded[i]);
+      }
+
+      // Randomly add other individuals to promote genetic diversity
+      for (var i=retain_length; i<graded.length;i++) {
+        if (random_select > Math.random() ){
+            parents.push(graded[i]);
+        }
+      }
+
+      // Mutate some individuals
+      for (var i=0; i <parents_length;i++) {
+        if ( mutate > Math.random() ) {
+          pos_to_mutate = randint(0,individual.length-1);
+          parents[i][pos_to_mutate] = randInt(min,max);
+        }
+      }
+
+      // Crossover parents to create children
+      var parents_length = parents.length;
+      var desired_length = pop.length - parents_length;
+      var children = [];
+      while (children.length < desired_length) {
+        male = randint(0,parents_length-1);
+        female = randint(0, parents_length-1)
+        if (male != female) {
+          male = parents[male]
+          female = parents[female]
+          half = Math.ceil(male.length / 2);
+          male = male.slice(0,half)
+          female = female.slice(half);
+          child = male.concat(female);
+          children.push(child);
+        }
+
+      }
+      parents = parents.concat(children);
+      return parents;
+  }
+
+
 </script>
 
 <style>
