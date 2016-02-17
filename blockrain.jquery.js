@@ -15,7 +15,80 @@
   "use strict";
 
   $.widget('aerolab.blockrain', {
+    _numHoles: function(blocks,x,y,drop) {
+      var game = this;
+      var coors = []
+      var holes = 0;
+      var blockades = 0;
 
+      for (i=0; i<blocks.length; i+=2) {
+        coors.push([x + blocks[i], y + blocks[i+1]]);
+      }
+
+      //Track lowest block for each column
+      var span = {}
+      for (var i=0; i<blocks.length; i+=2) {
+          var x_coor = x + blocks[i];
+          var y_coor = y + blocks[i+1];
+          if (span[x_coor] == undefined) {
+            span[x_coor] = y_coor;
+          }
+          else if (span[x_coor] < y_coor) {
+            span[x_coor] = y_coor;
+          }
+      }
+
+      $.each( span, function( x_val, y_val ) {
+        var cts = true;
+        for (var j = y_val + 1; j < 20; j++) {
+          if (game._filled.check(parseInt(x_val),j) == undefined) {
+            if(j == y_val + 1 || cts) {
+                holes++;
+                if (j <= 18 && game._filled.check(parseInt(x_val),j+1) != undefined) {
+                  cts = false
+                }
+            } else {
+              blockades++;
+            }
+          } else {
+            cts = false;
+          }
+        }
+      });
+      if(drop) {
+        $("#holes").html(holes);
+        $("#blockades").html(blockades);
+      }
+
+
+      return [holes, blockades];
+    },
+    _walls: function(blocks,x,y,drop) {
+      var walls = 0;
+      var coors = [];
+      for (var i=0; i<blocks.length; i+=2) {
+        if (x+blocks[i] == 0 || x+blocks[i] == 9) {
+          walls++;
+        }
+      }
+      if (drop) {
+        $("#walls").html(walls);
+      }
+
+      return walls;
+    },
+    maxHeight: function() {
+      for( var y=0; y<game._BLOCK_HEIGHT; y++) {
+        for( var x=0; x<game._BLOCK_WIDTH; x++) {
+          if (this.check(x,y) != undefined) {
+            return game._BLOCK_HEIGHT - y;
+          }
+        }
+      }
+    },
+    _edges: function(blocks,x,y) {
+
+    },
     options: {
       autoplay: false, // Let a bot play the game
       autoplayRestart: true, // Restart the game automatically once a bot loses
@@ -276,7 +349,6 @@
     _info: null,
     _filled: null,
 
-
     /**
      * Draws the background
      */
@@ -298,8 +370,8 @@
             var cx = x * this._block_size;
             var cy = y * this._block_size;
 
-            this._ctx.drawImage(  this._theme.backgroundGrid, 
-                                  0, 0, this._theme.backgroundGrid.width, this._theme.backgroundGrid.height, 
+            this._ctx.drawImage(  this._theme.backgroundGrid,
+                                  0, 0, this._theme.backgroundGrid.width, this._theme.backgroundGrid.height,
                                   cx, cy, this._block_size, this._block_size);
           }
         }
@@ -340,12 +412,12 @@
        * Keep in mind that the blocks should keep in the same relative position when rotating,
        * to allow for custom per-block themes.
        */
-      /*            
-       *   X      
-       *   O  XOXX
-       *   X      
+      /*
        *   X
-       *   .   .      
+       *   O  XOXX
+       *   X
+       *   X
+       *   .   .
        */
       line: [
           [ 0, -1,   0, -2,   0, -3,   0, -4],
@@ -375,9 +447,9 @@
         [1, -2,   1, -1,   1,  0,   2, -1]
       ],
       /*
-       *    X    X XX 
-       *    O  XOX  O XOX 
-       *   .XX .   .X X   
+       *    X    X XX
+       *    O  XOX  O XOX
+       *   .XX .   .X X
        */
       rightHook: [
         [2,  0,   1,  0,   1, -1,   1, -2],
@@ -386,9 +458,9 @@
         [0,  0,   0, -1,   1, -1,   2, -1]
       ],
       /*
-       *    X      XX X  
+       *    X      XX X
        *    O XOX  O  XOX
-       *   XX . X .X  .  
+       *   XX . X .X  .
        */
       leftHook: [
         [0,  0,   1,  0,   1, -1,   1, -2],
@@ -397,9 +469,9 @@
         [0, -2,   0, -1,   1, -1,   2, -1]
       ],
       /*
-       *    X  XX 
+       *    X  XX
        *   XO   OX
-       *   X   .  
+       *   X   .
        */
       leftZag: [
         [0,  0,   0, -1,   1, -1,   1, -2],
@@ -408,9 +480,9 @@
         [0, -2,   1, -2,   1, -1,   2, -1]
       ],
       /*
-       *   X    
+       *   X
        *   XO   OX
-       *   .X  XX   
+       *   .X  XX
        */
       rightZag: [
         [1,  0,   1, -1,   0, -1,   0, -2],
@@ -556,9 +628,9 @@
         add: function(x, y, blockType, blockVariation, blockIndex, blockOrientation) {
           if (x >= 0 && x < game._BLOCK_WIDTH && y >= 0 && y < game._BLOCK_HEIGHT) {
             this.data[this.asIndex(x, y)] = {
-              blockType: blockType, 
-              blockVariation: blockVariation, 
-              blockIndex: blockIndex, 
+              blockType: blockType,
+              blockVariation: blockVariation,
+              blockIndex: blockIndex,
               blockOrientation: blockOrientation
             };
           }
@@ -778,10 +850,10 @@
           if( !this.paused && !this.gameover ) {
 
             this.dropCount++;
-            
+
             // Drop by delay or holding
-            if( (this.dropCount >= this.dropDelay) || 
-                (game.options.autoplay) || 
+            if( (this.dropCount >= this.dropDelay) ||
+                (game.options.autoplay) ||
                 (this.holding.drop && (now - this.holding.drop) >= this.holdingThreshold) ) {
               drop = true;
             moved = true;
@@ -803,9 +875,14 @@
             // Test for a collision, add the piece to the filled blocks and fetch the next one
             if (drop) {
               var cur = this.cur, x = cur.x, y = cur.y, blocks = cur.getBlocks();
+
               if (game._checkCollisions(x, y+1, blocks, true)) {
+                game._numHoles(blocks,x,y,true);
+                game._walls(blocks,x,y,true);
+
                 drop = false;
                 var blockIndex = 0;
+
                 for (var i=0; i<cur.blocksLen; i+=2) {
                   game._filled.add(x + blocks[i], y + blocks[i+1], cur.blockType, cur.blockVariation, blockIndex, cur.orientation);
                   if (y + blocks[i] < 0) {
@@ -874,7 +951,7 @@
               if (!blockType || !game._randInt(0, 3)) blockType = game._randChoice(blockTypes);
 
               // Use a random piece and orientation
-              // Todo: Use an actual random variation
+              // ToChange: Use an actual random variation
               game._filled.add(i, game._BLOCK_HEIGHT - j, blockType, game._randInt(0,3), null, game._randInt(0,3));
             }
           }
@@ -912,7 +989,7 @@
 
         /**
          * Draws one block (Each piece is made of 4 blocks)
-         * The blockType is used to draw any block. 
+         * The blockType is used to draw any block.
          * The falling attribute is needed to apply different styles for falling and placed blocks.
          */
         drawBlock: function(x, y, blockType, blockVariation, blockIndex, blockRotation, falling) {
@@ -956,7 +1033,7 @@
                 var maxY = Math.max(positions[1], positions[3], positions[5], positions[7]);
                 var rangeX = maxX - minX + 1;
                 var rangeY = maxY - minY + 1;
-                
+
                 // X and Y sizes should match. Should.
                 var tileSizeX = image.width / rangeX;
                 var tileSizeY = image.height / rangeY;
@@ -976,9 +1053,9 @@
               game._ctx.translate(x, y);
               game._ctx.translate(game._block_size/2, game._block_size/2);
               game._ctx.rotate(-Math.PI/2 * blockRotation);
-              game._ctx.drawImage(color,  coords.x, coords.y, coords.w, coords.h, 
+              game._ctx.drawImage(color,  coords.x, coords.y, coords.w, coords.h,
                                           -game._block_size/2, -game._block_size/2, game._block_size, game._block_size);
-              
+
               game._ctx.restore();
 
             } else {
@@ -1045,7 +1122,7 @@
             if( $.isArray(blockTheme) ) {
               if( blockVariation !== null && typeof blockTheme[blockVariation] !== 'undefined' ) {
                 return blockTheme[blockVariation];
-              } 
+              }
               else if(blockTheme.length > 0) {
                 return blockTheme[0];
               } else {
@@ -1271,8 +1348,18 @@
         shapes[attr] = this._shapeFactory[attr]();
       }
 
+      //TODO: Replace scoring algorithm
       function scoreBlocks(possibles, blocks, x, y, filled, width, height) {
         var i, len=blocks.length, score=0, bottoms = {}, tx, ty, overlaps;
+
+        var res = game._numHoles(blocks,x,y,false);
+        var h = res[0];
+        var bl = res[1];
+        var w = game._walls(blocks,x,y,false);
+
+        score = score - h * 6;
+        score = score - bl * 3;
+        score = score + w * 1;
 
         // base score
         for (i=0; i<len; i+=2) {
@@ -1299,7 +1386,7 @@
           }
         }
 
-        score = score - overlaps;
+        // score = score - overlaps;
 
         return score;
       }
@@ -1339,11 +1426,15 @@
           shape = opts[attr];
           best_score_for_shape = -999;
 
+          console.log(shape.blockType);
+
           // for each orientation...
           for (i=0; i<(shape.symmetrical ? 2 : 4); i++) { //TODO - only look at unique orientations
+            console.log("Orientation: " + i);
             blocks = shape.getBlocks(i);
             bounds = shape.getBounds(blocks);
 
+            // TODO: Analyze this code
             // try each possible position...
             for (x=-bounds.left; x<width - bounds.width; x++) {
               for (y=-1; y<height - bounds.bottom; y++) {
@@ -1360,6 +1451,7 @@
               }
             }
           }
+          // best_x_for_shape = pickSpot(game._filled);
 
           if ((evil && best_score_for_shape < best_score) ||
               (!evil && best_score_for_shape > best_score)) {
@@ -1382,7 +1474,7 @@
 
 
     _randomShapes: function() {
-      // Todo: The shapefuncs should be cached.
+      // The shapefuncs should be cached.
       var shapeFuncs = [];
       $.each(this._shapeFactory, function(k,v) { shapeFuncs.push(v); });
 
@@ -1400,31 +1492,31 @@
       var moveLeft = function(start) {
         if( ! start ) { game._board.holding.left = null; return; }
         if( ! game._board.holding.left ) {
-          game._board.cur.moveLeft(); 
+          game._board.cur.moveLeft();
           game._board.holding.left = Date.now();
-          game._board.holding.right = null; 
+          game._board.holding.right = null;
         }
       }
       var moveRight = function(start) {
         if( ! start ) { game._board.holding.right = null; return; }
         if( ! game._board.holding.right ) {
-          game._board.cur.moveRight(); 
-          game._board.holding.right = Date.now(); 
-          game._board.holding.left = null; 
+          game._board.cur.moveRight();
+          game._board.holding.right = Date.now();
+          game._board.holding.left = null;
         }
       }
       var drop = function(start) {
         if( ! start ) { game._board.holding.drop = null; return; }
         if( ! game._board.holding.drop ) {
-          game._board.cur.drop(); 
+          game._board.cur.drop();
           game._board.holding.drop = Date.now();
         }
       }
       var rotateLeft = function() {
-        game._board.cur.rotate('left'); 
+        game._board.cur.rotate('left');
       }
       var rotateRight = function() {
-        game._board.cur.rotate('right'); 
+        game._board.cur.rotate('right');
       }
 
       // Handlers: These are used to be able to bind/unbind controls

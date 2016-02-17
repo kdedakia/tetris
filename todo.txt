@@ -1,0 +1,55 @@
+Todo
+
+Review
+  _getNiceShapes
+    1) scoreBlocks fxn
+    2) possibles array
+    3) func: shape function
+
+  nextShape
+    sets func
+
+Scope:
+  1) Normal Mode
+  2) 10x20 size
+
+
+Set: 1) Orientation 2) X-Position
+  Iterate all possible orientations and positions
+  Choose values using a scoring system
+  Score using various features
+  Genetic algorithm used to determine weightings
+
+
+
+Machine Learning Todo
+1) Choose Features
+2) Write fxns to get feature values
+  Got: Holes, Blockades, Walls, Max Height
+
+3) Write genetic algo
+  Fitness: Lines Cleared vs Score
+  Min/Max gene values
+  
+
+4) Tracking
+  Performance
+  Max Performance
+5) Create UI
+  Generation #
+  Population #
+
+
+
+
+
+Features
+1) New Holes
+  look at (some) spots below curr block and check if unfilled
+2) Blocks above Holes
+  keep track of all holes
+  check how many holes curr block is above
+3) Rows Cleared
+  modify checkForClears fxn
+4) Max Height
+  iterate through filled, return when it hits something
