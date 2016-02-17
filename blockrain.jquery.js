@@ -111,8 +111,15 @@
       // Basic Callbacks
       onStart: function(){},
       onRestart: function(){},
-      onGameOver: function(score){},
-
+      onGameOver: function(score) {
+        if (localStorage["data"] == undefined) {
+          var data = {}
+        } else {
+          var data = JSON.parse(localStorage["data"]);
+        }
+        data[Object.keys(data).length] = score;
+        localStorage["data"] = JSON.stringify(data);
+      },
       // When a block is placed
       onPlaced: function(){},
       // When a line is made. Returns the number of lines, score assigned and total score
