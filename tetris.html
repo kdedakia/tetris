@@ -25,32 +25,30 @@
     });
   });
 
-  var min = -10;
-  var max = -1*min;
+  var min = 0;
+  var max = 10;
 
   var POP_IDX = 0;
   var ALL_DATA = [];
   var DATA = [];
-
-  var POP_LENGTH = 6;
-  var NUM_GEN = 10;
+  var FEATURES = ["holes","blockades","walls"];
+  var POP_LENGTH = 10;
+  var NUM_GEN = 30;
   var F_H = [];
 
   // Create first population randomly
   makePop();
-
   function makePop() {
-    var p = population(POP_LENGTH,3);
+    var p = population(POP_LENGTH,FEATURES.length);
     for(var i=0;i<POP_LENGTH;i++){
       DATA.push({"id":i,"weights":p[i]});
     }
   }
 
   function finishEvolution() {
-    var retain = 0.5;
+    var retain = 0.4;
     var random_select = 0.05;
     var mutate = 0.05;
-    var num_generations = 10;
     var pop_size = POP_LENGTH;
 
     p = []
@@ -89,7 +87,7 @@
   function population(count,length) {
     arr = [];
     for (var i =0; i < count; i++) {
-      arr.push(individual(length,3))
+      arr.push(individual(length));
     }
     return arr;
   }

@@ -1374,8 +1374,8 @@
 
         // WEIGHTINGS
         var weights = DATA[POP_IDX].weights;
-        score = score + h * weights[0];
-        score = score + bl + weights[1];
+        score = score - h * weights[0];
+        score = score - bl + weights[1];
         score = score + w * weights[2];
 
         // base score
