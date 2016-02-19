@@ -140,16 +140,6 @@
         if (POP_IDX == POP_LENGTH) {
           finishEvolution();
         }
-
-        if (localStorage["data"] == undefined) {
-          var data = {}
-        } else {
-          var data = JSON.parse(localStorage["data"]);
-        }
-
-        //TODO: Use localstorage
-        // data[Object.keys(data).length] = {"id":Object.keys(data).length,"score":score,"gene":"DNA.gene"};
-        // localStorage["data"] = JSON.stringify(data);
       },
       // When a block is placed
       onPlaced: function(){},
