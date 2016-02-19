@@ -10,12 +10,46 @@
 <body>
   <div class="game" style="width:300px; height:600px;"></div>
   <h1>Generation: <span id="gen"></span> </h1>
+  <h1>Edges: <span id="edges"></span> </h1>
   <h1>Holes: <span id="holes"></span> </h1>
   <h1>Blockades: <span id="blockades"></span> </h1>
   <h1>Walls: <span id="walls"></span> </h1>
 </body>
 
 <script type="text/javascript">
+  Array.prototype.equals = function (array) {
+      // if the other array is a falsy value, return
+      if (!array)
+          return false;
+
+      // compare lengths - can save a lot of time
+      if (this.length != array.length)
+          return false;
+
+      for (var i = 0, l=this.length; i < l; i++) {
+          // Check if we have nested arrays
+          if (this[i] instanceof Array && array[i] instanceof Array) {
+              // recurse into the nested arrays
+              if (!this[i].equals(array[i]))
+                  return false;
+          }
+          else if (this[i] != array[i]) {
+              // Warning - two different object instances will never be equal: {x:20} != {x:20}
+              return false;
+          }
+      }
+      return true;
+  }
+
+  Array.prototype.inArr = function (array) {
+    for(var i=0;i<this.length;i++){
+      if (this[i].equals(array) ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   $(document).ready(function() {
     $('.game').blockrain({
       autoplay: true,
@@ -31,10 +65,68 @@
   var POP_IDX = 0;
   var ALL_DATA = [];
   var DATA = [];
-  var FEATURES = ["holes","blockades","walls"];
+  var FEATURES = ["holes","blockades","edges","walls","maxHeight"];
   var POP_LENGTH = 10;
   var NUM_GEN = 30;
   var F_H = [];
+
+  function getSummary(i,j) {
+      var obj = {"generation":i+1};
+      var game = ALL_DATA[i][j];
+      obj["score"] = game.score;
+      for (var x=0;x<FEATURES.length;x++) {
+        obj[FEATURES[x]] = game.weights[x];
+      }
+
+      return obj;
+  }
+
+  function maxScore() {
+    var max = 0;
+
+    for (var i=0; i < ALL_DATA.length; i++) {
+      for (var j=0;j < ALL_DATA[i].length;j++) {
+        var score = ALL_DATA[i][j].score
+        if (score > max) {
+          max = score;
+        }
+      }
+    }
+    return max;
+  }
+
+  // Get Top 10 Scores + Associated Weightings
+  //TODO: fix duplicate score bug
+  function topSummary(keep) {
+    var top = {}; //top[score] = [i,j]
+    var topScores = []; //Pop the lowest score, insert new top score
+
+    for(var i=0;i<ALL_DATA.length;i++){
+      for (var j=0;j<ALL_DATA[i].length;j++){
+        var s = ALL_DATA[i][j].score
+
+        // Add
+        if (topScores.length < keep){
+          topScores.push(s);
+          top[s] = [i,j];
+        }
+        //Replace
+        else if (s > topScores[0]) {
+          delete top[topScores.shift()]; //remove lowest
+          topScores.push(s);
+          topScores.sort(function(a, b){return a-b}); //ascending
+          top[s] = [i,j];
+        }
+      }
+    }
+
+    var topData = [];
+    for (k in top) {
+      topData.push(getSummary(top[k][0],top[k][1]));
+    }
+
+    return topData;
+  }
 
   // Create first population randomly
   makePop();
