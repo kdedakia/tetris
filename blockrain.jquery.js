@@ -15,6 +15,26 @@
   // "use strict";
 
   $.widget('aerolab.blockrain', {
+    _edges: function(coors) {
+      var game = this;
+      var edges = 0;
+
+      // Loop through each coor of block
+      for (var i=0; i<coors.length; i++) {
+        var x_coor = coors[i][0];
+        var y_coor = coors[i][1];
+
+        var checks = [[x_coor-1,y_coor],[x_coor+1,y_coor],[x_coor,y_coor+1]];
+        for (var j=0;j<checks.length;j++){
+          check = checks[j]
+          if (check[0] != -1 && check[0] != 10 && game._filled.check(check[0],check[1]) != undefined) {
+            edges++;
+          }
+        }
+      }
+
+      return edges;
+    },
     _numHoles: function(blocks,x,y,drop) {
       var game = this;
       var coors = []
@@ -24,6 +44,7 @@
       for (i=0; i<blocks.length; i+=2) {
         coors.push([x + blocks[i], y + blocks[i+1]]);
       }
+      var edges = game._edges(coors);
 
       //Track lowest block for each column
       var span = {}
@@ -58,9 +79,10 @@
       if(drop) {
         $("#holes").html(holes);
         $("#blockades").html(blockades);
+        $("#edges").html(edges);
       }
 
-      return [holes, blockades];
+      return [holes, blockades, edges];
     },
     _walls: function(blocks,x,y,drop) {
       var walls = 0;
@@ -76,17 +98,17 @@
 
       return walls;
     },
-    maxHeight: function() {
+    _maxHeight: function() {
+      var game = this;
+
       for( var y=0; y<game._BLOCK_HEIGHT; y++) {
         for( var x=0; x<game._BLOCK_WIDTH; x++) {
-          if (this.check(x,y) != undefined) {
+          if (game._filled.check(x,y) != undefined) {
             return game._BLOCK_HEIGHT - y;
           }
         }
       }
-    },
-    _edges: function(blocks,x,y) {
-
+      return -1;
     },
     options: {
       autoplay: false, // Let a bot play the game
@@ -1370,13 +1392,17 @@
         var res = game._numHoles(blocks,x,y,false);
         var h = res[0];
         var bl = res[1];
-        var w = game._walls(blocks,x,y,false);
+        var edges = res[2];
+        var wallEdges = game._walls(blocks,x,y,false);
+        var maxH = game._maxHeight();
 
         // WEIGHTINGS
         var weights = DATA[POP_IDX].weights;
         score = score - h * weights[0];
-        score = score - bl + weights[1];
-        score = score + w * weights[2];
+        score = score - bl * weights[1];
+        score = score + edges * weights[2]
+        score = score + wallEdges * weights[3];
+        score = score - maxH * weights[4];
 
         // base score
         for (i=0; i<len; i+=2) {
