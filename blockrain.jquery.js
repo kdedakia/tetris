@@ -1388,11 +1388,11 @@
 
         // WEIGHTINGS
         var weights = DATA[POP_IDX].weights;
-        score = score - h * weights[0];
-        score = score - bl * weights[1];
+        score = score + h * weights[0];
+        score = score + bl * weights[1];
         score = score + edges * weights[2]
         score = score + wallEdges * weights[3];
-        score = score - maxH * weights[4];
+        score = score + maxH * weights[4];
 
         // base score
         for (i=0; i<len; i+=2) {

@@ -9,12 +9,29 @@
 
 <body>
   <div class="game" style="width:300px; height:600px;"></div>
-  <h1>Generation: <span id="gen"></span> </h1>
-  <h1>Edges: <span id="edges"></span> </h1>
-  <h1>Holes: <span id="holes"></span> </h1>
-  <h1>Blockades: <span id="blockades"></span> </h1>
-  <h1>Walls: <span id="walls"></span> </h1>
+  <div class="stats">
+    <h1>Generation: <span id="gen"></span> </h1>
+    <h1>Edges: <span id="edges"></span> </h1>
+    <h1>Holes: <span id="holes"></span> </h1>
+    <h1>Blockades: <span id="blockades"></span> </h1>
+    <h1>Walls: <span id="walls"></span> </h1>
+    <h1>Score: <span id="score"></span> </h1>
+  </div>
 </body>
+
+<style>
+  .game {
+    display: inline-block;
+  }
+
+  .stats {
+    display: inline-block;
+  }
+
+  .blockrain-score-num {
+    display: inline-block;
+  }
+</style>
 
 <script type="text/javascript">
   Array.prototype.equals = function (array) {
@@ -58,9 +75,11 @@
       theme: "candy",
       speed: 0
     });
+    $("#score").append( $(".blockrain-score-num") );
+    $(".blockrain-score").hide();
   });
 
-  var min = 0;
+  var min = -10;
   var max = 10;
   var retain = 0.4;
   var random_select = 0.05;
@@ -310,9 +329,5 @@
 
 
 </script>
-
-<style>
-
-</style>
 
 </html>
