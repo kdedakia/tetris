@@ -10,6 +10,18 @@
 <body>
   <div class="game" style="width:300px; height:600px;"></div>
   <div class="stats">
+    <label for="mutate">Mutation Rate</label>
+    <input id="mutate" type="text" placeholder="Mutation Rate"/>
+    <label for="retain">Retain Rate</label>
+    <input id="retain" type="text" placeholder="Retain Rate"/>
+    <label for="random_rate">Random Select Rate</label>
+    <input id="random_rate" type="text" placeholder="Random Select Rate"/>
+    <label for="min">Min</label>
+    <input id="min" type="text" placeholder="Min"/>
+    <label for="max">Max</label>
+    <input id="max" type="text" placeholder="Max"/>
+    <input id="change_btn" type="button" value="Change Parameters" />
+
     <h1>Generation: <span id="gen"></span> </h1>
     <h1>Edges: <span id="edges"></span> </h1>
     <h1>Holes: <span id="holes"></span> </h1>
@@ -26,6 +38,10 @@
 
   .stats {
     display: inline-block;
+  }
+
+  .stats input {
+    display: block;
   }
 
   .blockrain-score-num {
@@ -82,7 +98,7 @@
   var min = -10;
   var max = 10;
   var retain = 0.4;
-  var random_select = 0.05;
+  var random_rate = 0.05;
   var mutate = 0.05;
 
   var POP_IDX = 0;
@@ -102,8 +118,23 @@
     else {
       makeInitialPop();
     }
+
+    $("#mutate").val(mutate);
+    $("#retain").val(retain);
+    $("#random_rate").val(random_rate);
+    $("#min").val(min);
+    $("#max").val(max);
   }
 
+  $("#change_btn").click(function() {
+    mutate = parseFloat($("#mutate").val());
+    retain = parseFloat($("#retain").val());
+    random_rate = parseFloat($("#random_rate").val());
+    min = parseFloat($("#min").val());
+    max = parseFloat($("#max").val());
+    LOAD_DATA = false;
+    initialize();
+  });
 
 
   function inStorage(key) {
@@ -190,6 +221,10 @@
 
   // Create first population randomly, if no data available
   function makeInitialPop() {
+    ALL_DATA = [];
+    DATA = [];
+    F_H = [];
+    $("#gen").html(F_H.length);
     var p = population(POP_LENGTH,FEATURES.length);
     for(var i=0;i<POP_LENGTH;i++){
       DATA.push({"id":i,"weights":p[i]});
@@ -205,7 +240,7 @@
     DATA = ALL_DATA[ALL_DATA.length-1];
 
     $("#gen").html(F_H.length);
-    p = evolve(p,retain,random_select,mutate);
+    p = evolve(p,retain,random_rate,mutate);
 
     DATA = [];
     for(var i=0;i<POP_LENGTH;i++){
@@ -222,7 +257,7 @@
     var pop_grade = parseInt(grade(p));
     F_H.push(pop_grade);
     $("#gen").html(F_H.length);
-    p = evolve(p,retain,random_select,mutate);
+    p = evolve(p,retain,random_rate,mutate);
 
     // Reset
     POP_IDX = 0;
@@ -273,7 +308,7 @@
       return sum/pop.length;
   }
 
-  function evolve(pop,retain,random_select,mutate) {
+  function evolve(pop,retain,random_rate,mutate) {
       var graded = [];
       for (var x=0; x<pop.length;x++){
           graded.push([ fitness(x),pop[x] ]);
@@ -292,7 +327,7 @@
 
       // Randomly add other individuals to promote genetic diversity
       for (var i=retain_length; i<graded.length;i++) {
-        if (random_select > Math.random() ){
+        if (random_rate > Math.random() ){
             parents.push(graded[i]);
         }
       }
