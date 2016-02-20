@@ -5,6 +5,8 @@
   <link rel="stylesheet" src="blockrain.css">
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script src="blockrain.jquery.js"></script>
+  <script src="genetic.js"></script>
+  <script src="logging.js"></script>
 </head>
 
 <body>
@@ -93,63 +95,129 @@
   }
 
   $(document).ready(function() {
-    initialize();
+    // initialize();
     $('.game').blockrain({
       autoplay: true,
-      autoplayRestart: true,
+      autoplayRestart: false,
       theme: "candy",
       speed: 0
     });
+    presets();
     $("#score").append( $(".blockrain-score-num") );
     $(".blockrain-score").hide();
   });
 
   /* GENETIC ALGORITHM PARAMETERS */
-  var min = 0;
-  var max = 10;
-  var retain = 0.4;
-  var random_rate = 0.05;
-  var mutate = 0.03;
-  var elite_length = 2;
+  var elite_length;
+  var max;
+  var max_generations;
+  var min;
+  var mutate;
+  var POP_LENGTH;
+  var random_rate;
+  var retain;
 
   /* GLOBAL VARIABLES */
-  var POP_IDX = 0;
+  var LOAD_DATA = true;
+  var FEATURES = ["holes","blockades","edges","walls","maxHeight"];
+  var DEFAULT_CONFIG = {
+    "elite_length":2,
+    "max":1,
+    "max_generations":100,
+    "min":0,
+    "mutate":0.02,
+    "pop_length":12,
+    "random_rate":0.02,
+    "retain":0.4,
+  };
+
+  /* TEMP STORAGE VARS */
   var ALL_DATA = [];
   var DATA = [];
-  var FEATURES = ["holes","blockades","edges","walls","maxHeight"];
-  var POP_LENGTH = 8;
-  var NUM_GEN = 30;
   var F_H = [];
-  var LOAD_DATA = true;
+  var POP_IDX = 0;
+
+  var TO_RUN = [];
+  var CURR_RUN;
+  var RUN_IDX = 0;
+
+
+  //Used to makeRun to avoid changing DEFAULT_CONFIG
+  function clone(obj){
+    if(obj == null || typeof(obj) != 'object')
+        return obj;
+
+    var temp = new obj.constructor();
+    for(var key in obj)
+        temp[key] = clone(obj[key]);
+
+    return temp;
+  }
+
+  function startRun() {
+    CURR_RUN = TO_RUN[RUN_IDX];
+    resetData();
+    changeParams2(CURR_RUN.config);
+    initialize();
+    $(".game").blockrain('start');
+  }
+
+  function presets() {
+    TO_RUN.push(
+      makeRun({
+        "pop_length":20,
+        "max_generations":50
+      })
+    );
+    TO_RUN.push(
+      makeRun({
+        "pop_length":20,
+        "max_generations":50,
+        "elite_length":5,
+        "mutate":0.005,
+        "random_rate":0.005
+      })
+    );
+    TO_RUN.push(
+      makeRun({
+        "pop_length":50,
+        "max_generations":40,
+        "elite_length": 5
+      })
+    );
+    TO_RUN.push(
+      makeRun({
+        "pop_length":100,
+        "max_generations":30,
+        "elite_length": 10,
+        "random_rate": 0.005,
+        "mutate": 0.005
+      })
+    );
+    TO_RUN.push(
+      makeRun({
+        "pop_length":100,
+        "max_generations":30,
+        "elite_length": 10,
+      })
+    );
+
+    startRun();
+  }
+
+  function makeRun(config) {
+      var run = {};
+      var obj = clone(DEFAULT_CONFIG);
+      run["config"] = $.extend(true,obj,config);
+      return run;
+  }
+
 
   function restartGame() {
     resetData();
     changeParams();
     initialize();
     $(".game").blockrain('restart');
-  }
-
-  function saveRun() {
-    var ALL_RUNS = [];
-    if(inStorage("ALL_RUNS")) {
-      ALL_RUNS = JSON.parse(localStorage["ALL_RUNS"]);
-    }
-
-    var run = {};
-    run["pop_length"] = POP_LENGTH;
-    run["features"] = FEATURES;
-    run["min"] = min;
-    run["max"] = max;
-    run["retain"] = retain;
-    run["random_rate"] = random_rate;
-    run["mutate"] = mutate;
-    run["elite_length"] = elite_length;
-    run["data"] = ALL_DATA;
-    run["fh"] = F_H;
-    ALL_RUNS.push(run);
-    localStorage["ALL_RUNS"] = JSON.stringify(ALL_RUNS);
-
-    restartGame();
   }
 
   function resetData() {
@@ -164,20 +232,15 @@
     numGame();
   }
 
-  function numGame() {
-    var num = 0.0;
-    if(DATA.length != 0) {
-      for(var i=0;i<POP_LENGTH;i++) {
-        num++;
-        if (DATA[i].score == undefined) {
-          num = (num/POP_LENGTH*100).toFixed(2);
-          break;
-        }
-      }
-    }
-
-    $("#progress").html(num);
-    return;
+  function changeParams2(config) {
+    elite_length = config.elite_length;
+    max = config.max;
+    max_generations = config.max_generations;
+    min = config.min;
+    mutate = config.mutate;
+    POP_LENGTH = config.pop_length;
+    retain = config.retain;
+    random_rate = config.random_rate;
   }
 
   function changeParams() {
@@ -206,101 +269,6 @@
     $("#random_rate").val(random_rate);
     $("#min").val(min);
     $("#max").val(max);
-  }
-
-  $("#save_btn").click(function() {
-    saveRun();
-  });
-
-  $("#scrap_btn").click(function() {
-    restartGame();
-  });
-
-  $("#change_btn").click(function() {
-    restartGame();
-  });
-
-
-  function inStorage(key) {
-    if (Object.keys(localStorage).indexOf(key) != -1) {
-      return true;
-    }
-    return false;
-  }
-
-  function pullAllData() {
-    if (LOAD_DATA) {
-      key = "ALL_DATA";
-      if (inStorage(key)) {
-        ALL_DATA = JSON.parse(localStorage[key]);
-        F_H = JSON.parse(localStorage["F_H"]);
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  function saveData() {
-    localStorage["ALL_DATA"] = JSON.stringify(ALL_DATA);
-    localStorage["F_H"] = JSON.stringify(F_H);
-  }
-
-  function getSummary(i,j) {
-      var obj = {"generation":i+1};
-      var game = ALL_DATA[i][j];
-      obj["score"] = game.score;
-      for (var x=0;x<FEATURES.length;x++) {
-        obj[FEATURES[x]] = game.weights[x];
-      }
-
-      return obj;
-  }
-
-  function maxScore() {
-    var max = 0;
-
-    for (var i=0; i < ALL_DATA.length; i++) {
-      for (var j=0;j < ALL_DATA[i].length;j++) {
-        var score = ALL_DATA[i][j].score
-        if (score > max) {
-          max = score;
-        }
-      }
-    }
-    return max;
-  }
-
-  // Get Top 10 Scores + Associated Weightings
-  //TODO: fix duplicate score bug
-  function topSummary(keep) {
-    var top = {}; //top[score] = [i,j]
-    var topScores = []; //Pop the lowest score, insert new top score
-
-    for(var i=0;i<ALL_DATA.length;i++){
-      for (var j=0;j<ALL_DATA[i].length;j++){
-        var s = ALL_DATA[i][j].score
-
-        if (topScores.length < keep){
-          topScores.push(s);
-          top[s] = [i,j];
-        }
-        //Replace lowest score
-        else if (s > topScores[0]) {
-          delete top[topScores.shift()]; //remove lowest
-          topScores.push(s);
-          topScores.sort(function(a, b){return a-b}); //ascending order
-          top[s] = [i,j];
-        }
-      }
-    }
-
-    var topData = [];
-    for (k in top) {
-      topData.push(getSummary(top[k][0],top[k][1]));
-    }
-
-    return topData;
   }
 
   // Create first population randomly, if no data available
@@ -349,114 +317,37 @@
       DATA.push({"id":i,"weights":p[i]});
     }
 
+    if (CURR_RUN.config.max_generations == F_H.length) {
+      saveRun();
+      RUN_IDX++;
+      if(RUN_IDX < TO_RUN.length) {
+        startRun();
+      } else {
+        $(".game").blockrain('pause');
+        alert("FINISHED!");
+        RUN_IDX = 0;
+      }
+    } else {
+      $(".game").blockrain('restart');
+    }
+
     return pop_grade;
   }
 
 
-  /*
-    GENETIC ALGORITHM CODE
-  */
 
-  function randint(min_val, max_val) {
-    return Math.floor(Math.random() * (max_val - min_val + 1) + min_val);
-  }
-  function individual(num_features) {
-    var features = [];
+  /* CLICK HANDLERS */
+  $("#save_btn").click(function() {
+    saveRun();
+  });
 
-    for(var i = 0; i < num_features; i++) {
-      features.push(Math.random() * (max - min) + min);
-    }
-    return features;
-  }
+  $("#scrap_btn").click(function() {
+    restartGame();
+  });
 
-  function population(count,length) {
-    arr = [];
-    for (var i =0; i < count; i++) {
-      arr.push(individual(length));
-    }
-    return arr;
-  }
-
-  function fitness(id){
-    return DATA[id].score;
-  }
-
-  function grade(pop) {
-      var sum = 0;
-      for (var i = 0; i < pop.length;i++) {
-        sum += DATA[i].score
-      }
-      return sum/pop.length;
-  }
-
-  function evolve(pop,retain,random_rate,mutate) {
-      var graded = [];
-      for (var x=0; x<pop.length;x++){
-          graded.push([ fitness(x),pop[x] ]);
-      }
-
-      graded = graded.sort(function(a, b){return b[0]-a[0]});
-      for (var i=0;i<graded.length;i++){
-        graded[i] = graded[i][1];
-      }
-
-      var retain_length = Math.floor(graded.length * retain);
-      var parents = [];
-
-      /*
-      pop = 15
-      retain = 0.4
-      r_l = 6
-      e_l = 2
-      so take 0,1 as elites 0->e_l-1
-      mutate 2,3,4,5 e_l -> total: r_l - e_l
-      */
-      for (var i=elite_length;i < retain_length; i++) {
-        parents.push(graded[i]);
-      }
-
-      // Randomly add other individuals to promote genetic diversity
-      for (var i=retain_length; i<graded.length;i++) {
-        if (random_rate > Math.random() ){
-            parents.push(graded[i]);
-        }
-      }
-
-      // Mutate some individuals
-      for (var i=0; i <parents_length;i++) {
-        if ( mutate > Math.random() ) {
-          pos_to_mutate = randint(0,individual.length-1);
-          parents[i][pos_to_mutate] = randInt(min,max);
-        }
-      }
-
-      // Add elites
-      for (var i=0;i <elite_length;i++) {
-        parents.push(graded[i]);
-      }
-
-      // Crossover parents to create children
-      var parents_length = parents.length;
-      var desired_length = pop.length - parents_length;
-      var children = [];
-      while (children.length < desired_length) {
-        male = randint(0,parents_length-1);
-        female = randint(0, parents_length-1)
-        if (male != female) {
-          male = parents[male]
-          female = parents[female]
-          half = Math.ceil(male.length / 2);
-          male = male.slice(0,half)
-          female = female.slice(half);
-          child = male.concat(female);
-          children.push(child);
-        }
-
-      }
-      parents = parents.concat(children);
-      return parents;
-  }
-
+  $("#change_btn").click(function() {
+    restartGame();
+  });
 
 </script>
 

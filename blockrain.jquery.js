@@ -134,13 +134,16 @@
       onRestart: function(){},
       onGameOver: function(score) {
         numGame();
+        DATA[POP_IDX].score = score;
         if (POP_IDX < POP_LENGTH) {
-          DATA[POP_IDX].score = score
           POP_IDX += 1;
+          if (POP_IDX == POP_LENGTH) {
+            finishEvolution();
+          } else {
+            $(".game").blockrain('start');
+          }
         }
-        if (POP_IDX == POP_LENGTH) {
-          finishEvolution();
-        }
+
       },
       // When a block is placed
       onPlaced: function(){},
@@ -1388,12 +1391,14 @@
         var maxH = game._maxHeight();
 
         // WEIGHTINGS
-        var weights = DATA[POP_IDX].weights;
-        score = score - h * weights[0];
-        score = score - bl * weights[1];
-        score = score + edges * weights[2]
-        score = score + wallEdges * weights[3];
-        score = score - maxH * weights[4];
+        if (DATA.length != 0) {
+          var weights = DATA[POP_IDX].weights;
+          score = score - h * weights[0];
+          score = score - bl * weights[1];
+          score = score + edges * weights[2]
+          score = score + wallEdges * weights[3];
+          score = score - maxH * weights[4];
+        }
 
         // base score
         for (i=0; i<len; i+=2) {
