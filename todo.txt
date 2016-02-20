@@ -23,24 +23,30 @@ Set: 1) Orientation 2) X-Position
 
 
 Machine Learning Todo
-1) Choose Features
+1) Choose Features: DONE
 2) Write fxns to get feature values
-  Got: Holes, Blockades, Walls, Max Height
-
-3) Write genetic algo
-  Fitness: Lines Cleared vs Score
+  Got: Holes, Blockades, Walls, Max Height, Edges
+  Get: Lines Cleared
+3) Write genetic algo: DONE
+  Fitness: Score
   Min/Max gene values
-  
-
-4) Tracking
+4) Tracking: DONE
   Performance
-  Max Performance
-5) Create UI
+  Max Performance: DONE
+5) Create UI: DONE
   Generation #
   Population #
-
-
-
+6) Use Localstorage: DONE
+  Storage previous generations
+  Keep continuing where it left off if there is data
+7) Log each run: DONE
+  A)Parameters
+  B)ALL_DATA
+  C)F_H
+  Store in JSON file
+8) preset runs: DONE
+  automatically load up configs, run all for X generations, log data and repeat
+9) Graph It
 
 
 Features
