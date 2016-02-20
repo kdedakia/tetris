@@ -105,7 +105,7 @@ function getRuns() {
   if(inStorage("ALL_RUNS")) {
     return JSON.parse(localStorage["ALL_RUNS"]);
   }
-  return {};
+  return [];
 }
 
 function saveRun() {
@@ -113,17 +113,9 @@ function saveRun() {
   if(inStorage("ALL_RUNS")) {
     ALL_RUNS = JSON.parse(localStorage["ALL_RUNS"]);
   }
-
   var run = {};
   run["config"] = CURR_RUN.config
-  // run["pop_length"] = POP_LENGTH;
   run["features"] = FEATURES;
-  // run["min"] = min;
-  // run["max"] = max;
-  // run["retain"] = retain;
-  // run["random_rate"] = random_rate;
-  // run["mutate"] = mutate;
-  // run["elite_length"] = elite_length;
   run["data"] = ALL_DATA;
   run["fh"] = F_H;
   ALL_RUNS.push(run);
