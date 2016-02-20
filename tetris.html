@@ -181,6 +181,8 @@
   }
 
   function changeParams() {
+    POP_LENGTH = parseInt($("#population_length").val());
+    elite_length = parseInt($("#elite_length").val());
     mutate = parseFloat($("#mutate").val());
     retain = parseFloat($("#retain").val());
     random_rate = parseFloat($("#random_rate").val());
@@ -197,6 +199,8 @@
       makeInitialPop();
     }
 
+    $("#population_length").val(POP_LENGTH);
+    $("#elite_length").val(elite_length);
     $("#mutate").val(mutate);
     $("#retain").val(retain);
     $("#random_rate").val(random_rate);
@@ -301,9 +305,6 @@
 
   // Create first population randomly, if no data available
   function makeInitialPop() {
-    ALL_DATA = [];
-    DATA = [];
-    F_H = [];
     $("#gen").html(F_H.length);
     var p = population(POP_LENGTH,FEATURES.length);
     for(var i=0;i<POP_LENGTH;i++){
