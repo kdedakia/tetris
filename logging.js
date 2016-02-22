@@ -120,6 +120,7 @@ function saveRun() {
   run["fh"] = F_H;
   ALL_RUNS.push(run);
   localStorage["ALL_RUNS"] = JSON.stringify(ALL_RUNS);
+  saveOnline(run);
 
   restartGame();
 }

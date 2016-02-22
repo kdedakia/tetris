@@ -7,6 +7,7 @@
   <script src="blockrain.jquery.js"></script>
   <script src="genetic.js"></script>
   <script src="logging.js"></script>
+  <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 </head>
 
 <body>
@@ -61,6 +62,8 @@
 </style>
 
 <script type="text/javascript">
+
+
   Array.prototype.equals = function (array) {
       // if the other array is a falsy value, return
       if (!array)
@@ -95,7 +98,8 @@
   }
 
   $(document).ready(function() {
-    // initialize();
+    db = new Firebase('https://tetris-dedakia.firebaseio.com/');
+
     $('.game').blockrain({
       autoplay: true,
       autoplayRestart: false,
@@ -106,6 +110,20 @@
     $("#score").append( $(".blockrain-score-num") );
     $(".blockrain-score").hide();
   });
+
+  function getOnline() {
+    db.once("value", function(data) {
+      console.log(data.val());
+    });
+  }
+
+  function saveOnline(run) {
+    db.once("value", function(data) {
+      var temp = data.val();
+      temp.push(run);
+      db.set(temp);
+    });
+  }
 
   /* GENETIC ALGORITHM PARAMETERS */
   var elite_length;
@@ -118,6 +136,7 @@
   var retain;
 
   /* GLOBAL VARIABLES */
+  var db;
   var LOAD_DATA = true;
   var FEATURES = ["holes","blockades","edges","walls","maxHeight"];
   var DEFAULT_CONFIG = {
@@ -163,26 +182,31 @@
   }
 
   function presets() {
-    TO_RUN.push(
-      makeRun({
-        "pop_length":20,
-        "max_generations":50
-      })
-    );
-    TO_RUN.push(
-      makeRun({
-        "pop_length":20,
-        "max_generations":50,
-        "elite_length":5,
-        "mutate":0.005,
-        "random_rate":0.005
-      })
-    );
+    // TO_RUN.push(makeRun({"pop_length":2,"max_generations":1}));
+    // TO_RUN.push(makeRun({"pop_length":2,"max_generations":2}));
+    // TO_RUN.push(
+    //   makeRun({
+    //     "pop_length":20,
+    //     "max_generations":50
+    //   })
+    // );
+    // TO_RUN.push(
+    //   makeRun({
+    //     "pop_length":20,
+    //     "max_generations":50,
+    //     "elite_length":5,
+    //     "mutate":0.005,
+    //     "random_rate":0.005
+    //   })
+    // );
     TO_RUN.push(
       makeRun({
         "pop_length":50,
         "max_generations":40,
-        "elite_length": 5
+        "elite_length": 10,
+        "mutate":0.001,
+        "random_rate":0.001,
+        "retain":0.6
       })
     );
     TO_RUN.push(
