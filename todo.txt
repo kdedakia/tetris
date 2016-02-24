@@ -1,14 +1,3 @@
-Todo
-
-Review
-  _getNiceShapes
-    1) scoreBlocks fxn
-    2) possibles array
-    3) func: shape function
-
-  nextShape
-    sets func
-
 Scope:
   1) Normal Mode
   2) 10x20 size
@@ -21,10 +10,9 @@ Set: 1) Orientation 2) X-Position
   Genetic algorithm used to determine weightings
 
 
-
 Machine Learning Todo
 1) Choose Features: DONE
-2) Write fxns to get feature values
+2) Write fxns to get feature values: DONE
   Got: Holes, Blockades, Walls, Max Height, Edges
   Get: Lines Cleared
 3) Write genetic algo: DONE
