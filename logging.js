@@ -124,3 +124,31 @@ function saveRun() {
 
   restartGame();
 }
+
+function resetData() {
+  var to_reset = ["DATA","ALL_DATA","F_H"];
+  for (var i=0;i<to_reset.length;i++) {
+    delete localStorage[to_reset[i]];
+  }
+  DATA = [];
+  ALL_DATA = [];
+  F_H = [];
+  POP_IDX = 0;
+  numGame();
+}
+
+/* FIREBASE FUNCTIONS */
+
+function getOnline() {
+  db.once("value", function(data) {
+    console.log(data.val());
+  });
+}
+
+function saveOnline(run) {
+  db.once("value", function(data) {
+    var temp = data.val();
+    temp.push(run);
+    db.set(temp);
+  });
+}

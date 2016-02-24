@@ -7,6 +7,8 @@
   <script src="blockrain.jquery.js"></script>
   <script src="genetic.js"></script>
   <script src="logging.js"></script>
+  <script src="helper.js"></script>
+  <script src="features.js"></script>
   <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 </head>
 
@@ -63,40 +65,6 @@
 
 <script type="text/javascript">
 
-
-  Array.prototype.equals = function (array) {
-      // if the other array is a falsy value, return
-      if (!array)
-          return false;
-
-      // compare lengths - can save a lot of time
-      if (this.length != array.length)
-          return false;
-
-      for (var i = 0, l=this.length; i < l; i++) {
-          // Check if we have nested arrays
-          if (this[i] instanceof Array && array[i] instanceof Array) {
-              // recurse into the nested arrays
-              if (!this[i].equals(array[i]))
-                  return false;
-          }
-          else if (this[i] != array[i]) {
-              // Warning - two different object instances will never be equal: {x:20} != {x:20}
-              return false;
-          }
-      }
-      return true;
-  }
-
-  Array.prototype.inArr = function (array) {
-    for(var i=0;i<this.length;i++){
-      if (this[i].equals(array) ) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   $(document).ready(function() {
     db = new Firebase('https://tetris-dedakia.firebaseio.com/');
 
@@ -106,24 +74,13 @@
       theme: "candy",
       speed: 0
     });
+
     presets();
+
     $("#score").append( $(".blockrain-score-num") );
     $(".blockrain-score").hide();
   });
 
-  function getOnline() {
-    db.once("value", function(data) {
-      console.log(data.val());
-    });
-  }
-
-  function saveOnline(run) {
-    db.once("value", function(data) {
-      var temp = data.val();
-      temp.push(run);
-      db.set(temp);
-    });
-  }
 
   /* GENETIC ALGORITHM PARAMETERS */
   var elite_length;
@@ -136,7 +93,7 @@
   var retain;
 
   /* GLOBAL VARIABLES */
-  var db;
+  var db; //Firebase
   var LOAD_DATA = true;
   var FEATURES = ["holes","blockades","edges","walls","maxHeight"];
   var DEFAULT_CONFIG = {
@@ -160,25 +117,25 @@
   var CURR_RUN;
   var RUN_IDX = 0;
 
-
-  //Used to makeRun to avoid changing DEFAULT_CONFIG
-  function clone(obj){
-    if(obj == null || typeof(obj) != 'object')
-        return obj;
-
-    var temp = new obj.constructor();
-    for(var key in obj)
-        temp[key] = clone(obj[key]);
-
-    return temp;
-  }
-
   function startRun() {
     CURR_RUN = TO_RUN[RUN_IDX];
     resetData();
     changeParams2(CURR_RUN.config);
     initialize();
     $(".game").blockrain('start');
+  }
+
+  function gameOver(score) {
+    numGame();
+    DATA[POP_IDX].score = score;
+    if (POP_IDX < POP_LENGTH) {
+      POP_IDX += 1;
+      if (POP_IDX == POP_LENGTH) {
+        finishEvolution();
+      } else {
+        $(".game").blockrain('start');
+      }
+    }
   }
 
   function presets() {
@@ -236,24 +193,11 @@
       return run;
   }
 
-
   function restartGame() {
     resetData();
     changeParams();
     initialize();
     $(".game").blockrain('restart');
-  }
-
-  function resetData() {
-    var to_reset = ["DATA","ALL_DATA","F_H"];
-    for (var i=0;i<to_reset.length;i++) {
-      delete localStorage[to_reset[i]];
-    }
-    DATA = [];
-    ALL_DATA = [];
-    F_H = [];
-    POP_IDX = 0;
-    numGame();
   }
 
   function changeParams2(config) {
@@ -357,8 +301,6 @@
 
     return pop_grade;
   }
-
-
 
   /* CLICK HANDLERS */
   $("#save_btn").click(function() {
