@@ -95,7 +95,7 @@
   /* GLOBAL VARIABLES */
   var db; //Firebase
   var LOAD_DATA = true;
-  var FEATURES = ["holes","blockades","edges","walls","maxHeight"];
+  var FEATURES = ["holes","blockades","edges","walls","maxHeight","linesCleared"];
   var DEFAULT_CONFIG = {
     "elite_length":2,
     "max":1,
@@ -178,7 +178,7 @@
     TO_RUN.push(
       makeRun({
         "pop_length":100,
-        "max_generations":30,
+        "max_generations":40,
         "elite_length": 10,
       })
     );

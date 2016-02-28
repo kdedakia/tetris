@@ -94,6 +94,38 @@ function getMaxHeight(game) {
   return -1;
 }
 
+function getLinesCleared(game,blocks,x,y) {
+  var coors = [];
+  var lines = 0;
+
+  for (i=0; i<blocks.length; i+=2) {
+    coors.push([x + blocks[i], y + blocks[i+1]]);
+  }
+
+  for( var y=0; y<game._BLOCK_HEIGHT; y++) {
+    var count = 0;
+
+    for( var x=0; x<game._BLOCK_WIDTH; x++) {
+      if (game._filled.check(x,y) != undefined) {
+        count++;
+      } else {
+        // Check if new blocks are in the spot
+        for (var i=0; i < coors.length; i++) {
+          if(coors[i][0] == x && coors[i][1] == y) {
+            count++;
+          }
+        }
+      }
+      if (x == game._BLOCK_WIDTH-1 && count == game._BLOCK_WIDTH) {
+        lines++;
+      }
+    }
+
+  }
+
+  return lines;
+}
+
 function blockScore(game,possibles, blocks, x, y, filled, width, height) {
   var score = 0;
   var res = getHoles(game,blocks,x,y,false);
@@ -102,6 +134,7 @@ function blockScore(game,possibles, blocks, x, y, filled, width, height) {
   var edges = res[2];
   var wallEdges = getWalls(blocks,x,y,false);
   var maxH = getMaxHeight(game);
+  var linesCleared = getLinesCleared(game,blocks,x,y);
 
   // WEIGHTINGS
   if (DATA.length != 0) {
@@ -111,6 +144,7 @@ function blockScore(game,possibles, blocks, x, y, filled, width, height) {
     score = score + edges * weights[2]
     score = score + wallEdges * weights[3];
     score = score - maxH * weights[4];
+    score = score + linesCleared * weights[5];
   }
   return score;
 }
