@@ -149,6 +149,7 @@
     // TO_RUN.push(makeRun({"pop_length":2,"max_generations":1}));
     // TO_RUN.push(makeRun({"pop_length":2,"max_generations":2}));
 
+// RUN BLOCK 1
     TO_RUN.push(
       makeRun({
         "pop_length":50,
@@ -182,28 +183,54 @@
       })
     );
 
+// RUN BLOCK 2
+/*
+    TO_RUN.push(
+      makeRun({
+        "pop_length":50,
+        "max_generations":200,
+        "elite_length": 35, //highest
+        "random_rate": 0.001, //lowest
+        "mutate": 0.001, //lowest
+        "retain":0.8 //highest
+      })
+    );
 
-    // TO_RUN.push(
-    //   makeRun({
-    //     "pop_length":100,
-    //     "max_generations":300,
-    //     "elite_length": 20,
-    //     "mutate":0.02,
-    //     "random_rate":0.02,
-    //     "retain":0.5
-    //   })
-    // );
-    // TO_RUN.push(
-    //   makeRun({
-    //     "pop_length":100,
-    //     "max_generations":300,
-    //     "elite_length": 30,
-    //     "mutate":0.01,
-    //     "random_rate":0.01,
-    //     "retain":0.5
-    //   })
-    // );
+    TO_RUN.push(
+      makeRun({
+        "pop_length":50,
+        "max_generations":100,
+        "elite_length": 5, //lowest
+        "random_rate": 0.005,
+        "mutate": 0.005,
+        "retain":0.5
+      })
+    );
+*/
 
+// RUN BLOCK 3
+/*
+    TO_RUN.push(
+      makeRun({
+        "pop_length":100,
+        "max_generations":300,
+        "elite_length": 20,
+        "mutate":0.02,
+        "random_rate":0.02,
+        "retain":0.5
+      })
+    );
+    TO_RUN.push(
+      makeRun({
+        "pop_length":100,
+        "max_generations":300,
+        "elite_length": 30,
+        "mutate":0.01,
+        "random_rate":0.01,
+        "retain":0.5
+      })
+    );
+*/
     startRun();
   }
 
