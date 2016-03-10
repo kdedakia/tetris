@@ -9,6 +9,7 @@
   <script src="logging.js"></script>
   <script src="helper.js"></script>
   <script src="features.js"></script>
+  <script src="analysis.js"></script>
   <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 </head>
 
@@ -158,12 +159,12 @@
     // );
     TO_RUN.push(
       makeRun({
-        "pop_length":50,
-        "max_generations":40,
-        "elite_length": 10,
-        "mutate":0.001,
-        "random_rate":0.001,
-        "retain":0.6
+        "pop_length":4,
+        "max_generations":200,
+        "elite_length": 1,
+        "mutate":0.05,
+        "random_rate":0.01,
+        "retain":0.5
       })
     );
     TO_RUN.push(
@@ -238,7 +239,7 @@
     $("#min").val(min);
     $("#max").val(max);
   }
-
+  //TODO: log weight name
   // Create first population randomly, if no data available
   function makeInitialPop() {
     $("#gen").html(F_H.length);
