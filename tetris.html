@@ -126,7 +126,6 @@
   function startRun() {
     t = Date.now();
     CURR_RUN = TO_RUN[RUN_IDX];
-    resetData();
     changeParams2(CURR_RUN.config);
     initialize();
     $(".game").blockrain('start');
@@ -337,6 +336,7 @@
       saveRun();
       RUN_IDX++;
       if(RUN_IDX < TO_RUN.length) {
+        resetData();
         startRun();
       } else {
         $(".game").blockrain('pause');
