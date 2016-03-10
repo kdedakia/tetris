@@ -42,3 +42,11 @@ function clone(obj){
 
   return temp;
 }
+
+function WeightsHash(weights) {
+  obj = {};
+  for (var x=0;x<FEATURES.length;x++) {
+    obj[FEATURES[x]] = weights[x];
+  }
+  return obj;
+}

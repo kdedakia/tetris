@@ -99,6 +99,7 @@
   var db; //Firebase
   var online;
   var myLineChart;
+  var t; //Track time for each run
   var LOAD_DATA = true;
   var FEATURES = ["holes","blockades","edges","walls","maxHeight","linesCleared"];
   var DEFAULT_CONFIG = {
@@ -123,6 +124,7 @@
   var RUN_IDX = 0;
 
   function startRun() {
+    t = Date.now();
     CURR_RUN = TO_RUN[RUN_IDX];
     resetData();
     changeParams2(CURR_RUN.config);
@@ -146,45 +148,59 @@
   function presets() {
     // TO_RUN.push(makeRun({"pop_length":2,"max_generations":1}));
     // TO_RUN.push(makeRun({"pop_length":2,"max_generations":2}));
-    // TO_RUN.push(
-    //   makeRun({
-    //     "pop_length":20,
-    //     "max_generations":50
-    //   })
-    // );
-    // TO_RUN.push(
-    //   makeRun({
-    //     "pop_length":20,
-    //     "max_generations":50,
-    //     "elite_length":5,
-    //     "mutate":0.005,
-    //     "random_rate":0.005
-    //   })
-    // );
+
     TO_RUN.push(
       makeRun({
-        "pop_length":100,
-        "max_generations":300,
-        "elite_length": 20,
-        "mutate":0.02,
-        "random_rate":0.01,
-        "retain":0.5
+        "pop_length":50,
+        "max_generations":100,
+        "elite_length": 10,
+        "random_rate": 0.005,
+        "mutate": 0.005,
+        "retain":0.5 // low retain
       })
     );
+
+    TO_RUN.push(
+      makeRun({
+        "pop_length":50,
+        "max_generations":100,
+        "elite_length": 25,
+        "random_rate": 0.005,
+        "mutate": 0.005,
+        "retain":0.7 //high retain
+      })
+    );
+
+    TO_RUN.push(
+      makeRun({
+        "pop_length":50,
+        "max_generations":100,
+        "elite_length": 25,
+        "random_rate": 0.02, //high
+        "mutate": 0.02, //high
+        "retain":0.7
+      })
+    );
+
+
     // TO_RUN.push(
     //   makeRun({
     //     "pop_length":100,
-    //     "max_generations":30,
-    //     "elite_length": 10,
-    //     "random_rate": 0.005,
-    //     "mutate": 0.005
+    //     "max_generations":300,
+    //     "elite_length": 20,
+    //     "mutate":0.02,
+    //     "random_rate":0.02,
+    //     "retain":0.5
     //   })
     // );
     // TO_RUN.push(
     //   makeRun({
     //     "pop_length":100,
-    //     "max_generations":40,
-    //     "elite_length": 10,
+    //     "max_generations":300,
+    //     "elite_length": 30,
+    //     "mutate":0.01,
+    //     "random_rate":0.01,
+    //     "retain":0.5
     //   })
     // );
 
@@ -249,7 +265,7 @@
     $("#gen").html(F_H.length);
     var p = population(POP_LENGTH,FEATURES.length);
     for(var i=0;i<POP_LENGTH;i++){
-      DATA.push({"id":i,"weights":p[i]});
+      DATA.push({"id":i,"weights":p[i],"weightsHash":WeightsHash(p[i])});
     }
   }
 
@@ -266,7 +282,7 @@
 
     DATA = [];
     for(var i=0;i<POP_LENGTH;i++){
-      DATA.push({"id":i,"weights":p[i]});
+      DATA.push({"id":i,"weights":p[i],"weightsHash":WeightsHash(p[i])});
     }
   }
 

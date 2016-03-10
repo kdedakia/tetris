@@ -59,6 +59,7 @@ function saveRun() {
   run["features"] = FEATURES;
   run["data"] = ALL_DATA;
   run["fh"] = F_H;
+  run["time"] = (Date.now() - t)/1000;
   ALL_RUNS.push(run);
   localStorage["ALL_RUNS"] = JSON.stringify(ALL_RUNS);
   saveOnline(run);
@@ -81,16 +82,29 @@ function resetData() {
 /* FIREBASE FUNCTIONS */
 
 function getOnline() {
-  db.once("value", function(data) {
+  db.child("games").once("value", function(data) {
     online = data.val();
     console.log(data.val());
   });
 }
 
 function saveOnline(run) {
-  db.once("value", function(data) {
+  db.child("games").once("value", function(data) {
     var temp = data.val();
     temp.push(run);
-    db.set(temp);
+    db.child("games").set(temp);
   });
 }
+
+/*
+function resetOnline() {
+  db.once("value", function(data) {
+    online = data.val();
+    var arr = [];
+    for (var k in online) {
+      arr.push(online[k]);
+    }
+    db.child("games").set(arr);
+  });
+}
+*/
