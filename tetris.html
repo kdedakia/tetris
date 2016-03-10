@@ -320,6 +320,7 @@
 
     var pop_grade = parseInt(grade(p));
     F_H.push(pop_grade);
+    graph(F_H);
     $("#gen").html(F_H.length);
     p = evolve(p,retain,random_rate,mutate);
 
