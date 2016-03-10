@@ -88,3 +88,28 @@ function graph(fh) {
 
   myLineChart = new Chart(ctx).Line(data, {});
 }
+
+function graph2(g) {
+  var ctx = document.getElementById("chart").getContext("2d");
+
+  var data = {
+      labels: FEATURES,
+      datasets: [
+          {
+              label: "My First dataset",
+              fillColor: "rgba(220,220,220,0.2)",
+              strokeColor: "rgba(220,220,220,1)",
+              pointColor: "rgba(220,220,220,1)",
+              pointStrokeColor: "#fff",
+              pointHighlightFill: "#fff",
+              pointHighlightStroke: "rgba(220,220,220,1)",
+              data: [g.holes, g.blockades, g.edges, g.walls, g.maxHeight, g.linesCleared]
+          }
+      ]
+  };
+
+  if(myRadarChart != undefined) {
+      myRadarChart.destroy();
+  }
+  myRadarChart = new Chart(ctx).Radar(data, {});
+}
