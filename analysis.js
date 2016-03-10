@@ -113,3 +113,31 @@ function graph2(g) {
   }
   myRadarChart = new Chart(ctx).Radar(data, {});
 }
+
+function graphRadars() {
+  var l = 3;
+  topSummary(l,online[2].data);
+  for (var i = 0; i < l; i++) {
+    var ctx = document.getElementById("r" + (i+1).toString()).getContext("2d");
+    g = topSummary(l,online[2].data)[i];
+    var data = {
+        labels: FEATURES,
+        datasets: [
+            {
+                label: "My First dataset",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: [g.holes, g.blockades, g.edges, g.walls, g.maxHeight, g.linesCleared]
+            }
+        ]
+    };
+    // if(myRadarChart != undefined) {
+    //     myRadarChart.destroy();
+    // }
+    myRadarChart = new Chart(ctx).Radar(data, {});
+  }
+}

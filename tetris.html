@@ -45,6 +45,12 @@
     <h1>Walls: <span id="walls"></span> </h1>
     <h1>Score: <span id="score"></span> </h1>
   </div>
+  <div class="radars">
+    <canvas id="r1" class="radar" width="400" height="400"></canvas>
+    <canvas id="r2" class="radar" width="400" height="400"></canvas>
+    <canvas id="r3" class="radar" width="400" height="400"></canvas>
+  </div>
+
   <div class="runs">
     <div class="run">
       <div>Population Length:</div>
@@ -83,6 +89,15 @@
     display: inline-block;
     vertical-align: top;
     display: none;
+  }
+
+  .radars {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .radar {
+    display: block;
   }
 
   .run {
