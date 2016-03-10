@@ -45,6 +45,28 @@
     <h1>Walls: <span id="walls"></span> </h1>
     <h1>Score: <span id="score"></span> </h1>
   </div>
+  <div class="runs">
+    <div class="run">
+      <div>Population Length:</div>
+      <div>Number of Elite:</div>
+      <div>Mutation Rate:</div>
+      <div>Retain Rate:</div>
+      <div>Random Select Rate:</div>
+      <div>Min:</div>
+      <div>Max:</div>
+      <div>Random Select Rate:</div>
+    </div>
+    <div class="run">
+      <div>Population Length:</div>
+      <div>Number of Elite:</div>
+      <div>Mutation Rate:</div>
+      <div>Retain Rate:</div>
+      <div>Random Select Rate:</div>
+      <div>Min:</div>
+      <div>Max:</div>
+      <div>Random Select Rate:</div>
+    </div>
+  </div>
   <canvas id="chart" width="1000" height="600"></canvas>
 </body>
 
@@ -55,6 +77,18 @@
 
   .stats {
     display: inline-block;
+  }
+
+  .runs {
+    display: inline-block;
+    vertical-align: top;
+    display: none;
+  }
+
+  .run {
+      border: 1px solid black;
+      padding: 5px;
+      margin: 5px 0px;
   }
 
   .stats input {
