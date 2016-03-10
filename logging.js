@@ -82,6 +82,7 @@ function resetData() {
 
 function getOnline() {
   db.once("value", function(data) {
+    online = data.val();
     console.log(data.val());
   });
 }

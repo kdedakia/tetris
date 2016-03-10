@@ -58,3 +58,33 @@ function topSummary(keep,run_data) {
 
   return topData;
 }
+
+function graph(fh) {
+  var ctx = document.getElementById("chart").getContext("2d");
+
+  var lbls = [];
+  for (var i=0;i<fh.length;i++) {
+    lbls.push((i+1).toString());
+  }
+
+  var data = {
+    labels: lbls,
+    datasets: [
+        {
+            label: "My First dataset",
+            fillColor: "rgba(220,220,220,0.2)",
+            strokeColor: "rgba(220,220,220,1)",
+            pointColor: "rgba(220,220,220,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: fh
+        }
+    ]
+  };
+  if(myLineChart != undefined) {
+      myLineChart.destroy();
+  }
+
+  myLineChart = new Chart(ctx).Line(data, {});
+}
