@@ -53,7 +53,7 @@
 
     <div class="run_history">
       <select id="select_run">
-        <option>SELECT RUN</option>
+        <option value="Current">Current Run</option>
       </select>
 
       <div id="info">
@@ -441,7 +441,13 @@
 
     var pop_grade = parseInt(grade(p));
     F_H.push(pop_grade);
-    // graph(F_H);
+    if($("#select_run").val() == "Current") {
+        var run = {};
+        run.fh = F_H;
+        run.data = ALL_DATA;
+        graph(run);
+    }
+
     $("#gen").html(F_H.length);
     p = evolve(p,retain,random_rate,mutate);
 
@@ -486,19 +492,28 @@
   });
 
   $( "#select_run" ).change(function() {
-    var id = $("#select_run").val();
-    var runs = online;
-    var i=0;
-    for (i; i < runs.length; i++) {
-        if (id == JSON.stringify(runs[i].config) ) {
-          active_run = runs[i];
-          graphRadars(runs[i].data,8);
-          graph(runs[i]);
-          showRunInfo(runs[i])
-          //TODO: show legend
-          // document.getElementById('legend').innerHTML = myLineChart.generateLegend();
-        }
+    if ($("#select_run").val() == "Current") {
+      $(".radars").html("");
+      // graph(runs[i]);
+      // showRunInfo(runs[i]);
     }
+    else {
+      var id = $("#select_run").val();
+      var runs = online;
+      var i=0;
+      for (i; i < runs.length; i++) {
+          if (id == JSON.stringify(runs[i].config) ) {
+            active_run = runs[i];
+            graphRadars(runs[i].data,8);
+            graph(runs[i]);
+            showRunInfo(runs[i])
+            //TODO: show legend
+            // document.getElementById('legend').innerHTML = myLineChart.generateLegend();
+          }
+      }
+    }
+
+
   });
 </script>
 
