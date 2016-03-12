@@ -26,6 +26,25 @@ function maxScore(run_data) {
   return max;
 }
 
+function topScores(run) {
+  run_data = typeof run !== 'undefined' ? run.data : ALL_DATA;
+  var topScores = new Array(run_data.length);
+  var topObj = new Array(run_data.length);
+
+  for(var i=0;i<run_data.length;i++){
+    var max = 0;
+    for (var j=0;j<run_data[i].length;j++){
+      var s = run_data[i][j].score
+      if (s > max) {
+        max = s;
+        topScores[i] = max;
+        topObj[i] = run_data[i][j];
+      }
+    }
+  }
+  return topScores;
+}
+
 // Get Top 10 Scores + Associated Weightings
 //TODO: fix duplicate score bug
 function topSummary(keep,run_data) {
@@ -59,11 +78,11 @@ function topSummary(keep,run_data) {
   return topData;
 }
 
-function graph(fh) {
+function graph(run) {
   var ctx = document.getElementById("chart").getContext("2d");
 
   var lbls = [];
-  for (var i=0;i<fh.length;i++) {
+  for (var i=0;i<run.fh.length;i++) {
     lbls.push((i+1).toString());
   }
 
@@ -71,17 +90,32 @@ function graph(fh) {
     labels: lbls,
     datasets: [
         {
-            label: "My First dataset",
+            label: "Fitness History",
             fillColor: "rgba(220,220,220,0.2)",
             strokeColor: "rgba(220,220,220,1)",
             pointColor: "rgba(220,220,220,1)",
             pointStrokeColor: "#fff",
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(220,220,220,1)",
-            data: fh
+            data: run.fh
+        },
+        {
+            label: "Top Score",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: topScores(run)
         }
+
     ]
   };
+
+  var options = {
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+  }
   if(myLineChart != undefined) {
       myLineChart.destroy();
   }
@@ -114,10 +148,16 @@ function graph2(g) {
   myRadarChart = new Chart(ctx).Radar(data, {});
 }
 
-function graphRadars() {
-  var l = 3;
-  topSummary(l,online[2].data);
-  for (var i = 0; i < l; i++) {
+function graphRadars(g,l) {
+
+  $(".radars").html("");
+  // var l = 3;
+  // topSummary(l,online[2].data);
+  for (var i = l-1; i >= 0; i--) {
+    $(".radars").append("<div class='radar r" + (i+1).toString() + "'>" + "<h2>Position:" + (l-i).toString() + "</h2><canvas id='" + "r" + (i+1).toString() + "' width='400' height='400'></canvas></div>");
+    if (i % 2 == 0) {
+      $(".radars").append("<br/>");
+    }
     var ctx = document.getElementById("r" + (i+1).toString()).getContext("2d");
     g = topSummary(l,online[2].data)[i];
     var data = {
@@ -125,7 +165,7 @@ function graphRadars() {
         datasets: [
             {
                 label: "My First dataset",
-                fillColor: "rgba(220,220,220,0.2)",
+                fillColor: "rgba(104,105,216,0.4)",
                 strokeColor: "rgba(220,220,220,1)",
                 pointColor: "rgba(220,220,220,1)",
                 pointStrokeColor: "#fff",
@@ -138,6 +178,36 @@ function graphRadars() {
     // if(myRadarChart != undefined) {
     //     myRadarChart.destroy();
     // }
-    myRadarChart = new Chart(ctx).Radar(data, {});
+    if (radar_charts[i] != undefined) {
+      radar_charts[i].destroy();
+    }
+    radar_charts[i] = new Chart(ctx).Radar(data, {});
+    // myRadarChart = new Chart(ctx).Radar(data, {});
   }
+}
+
+function showRadars() {
+
+}
+
+function showRunInfo(run) {
+  $("#info_pop").val(run.config.pop_length);
+  $("#info_elite").val(run.config.elite_length);
+  $("#info_mutate").val(run.config.mutate);
+  $("#info_retain").val(run.config.retain);
+  $("#info_random_rate").val(run.config.random_rate);
+  $("#info_min").val(run.config.min);
+  $("#info_max").val(run.config.max);
+}
+
+
+
+function setRuns() {
+  runs = typeof online !== 'undefined' ? online : JSON.parse(localStorage.ALL_RUNS);
+
+  for (var i=0;i<runs.length;i++) {
+    var id = JSON.stringify(runs[i].config);
+    $("#select_run").append("<option value='" + id + "' >" + i + "</option>");
+  }
+
 }

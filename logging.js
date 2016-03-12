@@ -81,18 +81,23 @@ function resetData() {
 
 /* FIREBASE FUNCTIONS */
 
-function getOnline() {
+function getOnline(cb) {
   db.child("games").once("value", function(data) {
     online = data.val();
     console.log(data.val());
+    setRuns();
+    cb();
   });
 }
 
 function saveOnline(run) {
   db.child("games").once("value", function(data) {
-    var temp = data.val();
-    temp.push(run);
-    db.child("games").set(temp);
+    if(run.config.max_generations > 10) {
+      var temp = data.val();
+      temp.push(run);
+      db.child("games").set(temp);
+    }
+
   });
 }
 

@@ -39,17 +39,46 @@
 
 
     <h1>Generation: <span id="gen"></span>  (<span id="progress"></span>%)</h1>
-    <h1>Edges: <span id="edges"></span> </h1>
+    <!-- <h1>Edges: <span id="edges"></span> </h1>
     <h1>Holes: <span id="holes"></span> </h1>
     <h1>Blockades: <span id="blockades"></span> </h1>
-    <h1>Walls: <span id="walls"></span> </h1>
+    <h1>Walls: <span id="walls"></span> </h1> -->
     <h1>Score: <span id="score"></span> </h1>
   </div>
-  <div class="radars">
-    <canvas id="r1" class="radar" width="400" height="400"></canvas>
-    <canvas id="r2" class="radar" width="400" height="400"></canvas>
-    <canvas id="r3" class="radar" width="400" height="400"></canvas>
+
+  <div class="analysis">
+    <h1>Top Scores vs Average Scores</div>
+    <canvas id="chart" width="1500" height="1000"></canvas>
+    <!-- <div id="legend"></div> -->
+
+    <div class="run_history">
+      <select id="select_run">
+        <option>SELECT RUN</option>
+      </select>
+
+      <div id="info">
+        <label for="info_pop">Population Length</label>
+        <input id="info_pop" type="text" placeholder="Population Length"/>
+        <label for="info_elite">Number of Elite</label>
+        <input id="info_elite" type="text" placeholder="Number of Elite"/>
+        <label for="info_mutate">Mutation Rate</label>
+        <input id="info_mutate" type="text" placeholder="Mutation Rate"/>
+        <label for="info_retain">Retain Rate</label>
+        <input id="info_retain" type="text" placeholder="Retain Rate"/>
+        <label for="info_random_rate">Random Select Rate</label>
+        <input id="info_random_rate" type="text" placeholder="Random Select Rate"/>
+        <label for="info_min">Min</label>
+        <input id="info_min" type="text" placeholder="Min"/>
+        <label for="info_max">Max</label>
+        <input id="info_max" type="text" placeholder="Max"/>
+      </div>
+    </div>
   </div>
+
+
+
+  <h1>Radar Chart for Top AI's</div>
+  <div class="radars"></div>
 
   <div class="runs">
     <div class="run">
@@ -73,17 +102,52 @@
       <div>Random Select Rate:</div>
     </div>
   </div>
-  <canvas id="chart" width="1000" height="600"></canvas>
+
 </body>
 
 <style>
+  body {
+    text-align: center;
+  }
+
   .game {
     display: inline-block;
   }
 
   .stats {
     display: inline-block;
+    vertical-align: top;
+    text-align: left;
   }
+
+
+
+  .analysis {
+    margin-top: 100px;
+  }
+
+  #chart {
+    display: inline-block;
+    margin: auto 0;
+  }
+
+  .run_history {
+      display: inline-block;
+      margin-left: 100px;
+      vertical-align: top;
+  }
+
+  #info {
+    text-align: left;
+  }
+
+  #info input {
+    display: block;
+  }
+
+
+
+
 
   .runs {
     display: inline-block;
@@ -92,12 +156,14 @@
   }
 
   .radars {
-    display: inline-block;
     vertical-align: top;
   }
 
   .radar {
-    display: block;
+    display: inline-block;
+    margin: 20px 60px;
+    padding: 20px;
+    border-top: 1px solid black;
   }
 
   .run {
@@ -119,6 +185,10 @@
 
   $(document).ready(function() {
     db = new Firebase('https://tetris-dedakia.firebaseio.com/');
+    getOnline(function() {
+      $("#select_run").prop("selectedIndex", 1);
+      $("#select_run").trigger("change");
+    });
 
     $('.game').blockrain({
       autoplay: true,
@@ -148,6 +218,7 @@
   var db; //Firebase
   var online;
   var myLineChart;
+  var radar_charts = [];
   var myRadarChart;
   var t; //Track time for each run
   var LOAD_DATA = false;
@@ -196,39 +267,39 @@
 
   function presets() {
     // TO_RUN.push(makeRun({"pop_length":2,"max_generations":1}));
-    // TO_RUN.push(makeRun({"pop_length":2,"max_generations":2}));
+    TO_RUN.push(makeRun({"pop_length":2,"max_generations":1000}));
 
 // RUN BLOCK 1
-    TO_RUN.push(
-      makeRun({
-        "pop_length":50,
-        "max_generations":100,
-        "elite_length": 10,
-        "random_rate": 0.005,
-        "mutate": 0.005,
-        "retain":0.5 // low retain
-      })
-    );
+    // TO_RUN.push(
+    //   makeRun({
+    //     "pop_length":50,
+    //     "max_generations":100,
+    //     "elite_length": 10,
+    //     "random_rate": 0.005,
+    //     "mutate": 0.005,
+    //     "retain":0.5 // low retain
+    //   })
+    // );
+    //
+    // TO_RUN.push(
+    //   makeRun({
+    //     "pop_length":50,
+    //     "max_generations":100,
+    //     "elite_length": 25,
+    //     "random_rate": 0.005,
+    //     "mutate": 0.005,
+    //     "retain":0.7 //high retain
+    //   })
+    // );
 
     TO_RUN.push(
       makeRun({
-        "pop_length":50,
+        "pop_length":20,
         "max_generations":100,
-        "elite_length": 25,
-        "random_rate": 0.005,
-        "mutate": 0.005,
-        "retain":0.7 //high retain
-      })
-    );
-
-    TO_RUN.push(
-      makeRun({
-        "pop_length":50,
-        "max_generations":100,
-        "elite_length": 25,
+        "elite_length": 4,
         "random_rate": 0.02, //high
         "mutate": 0.02, //high
-        "retain":0.7
+        "retain":0.4
       })
     );
 
@@ -370,7 +441,7 @@
 
     var pop_grade = parseInt(grade(p));
     F_H.push(pop_grade);
-    graph(F_H);
+    // graph(F_H);
     $("#gen").html(F_H.length);
     p = evolve(p,retain,random_rate,mutate);
 
@@ -414,6 +485,21 @@
     restartGame();
   });
 
+  $( "#select_run" ).change(function() {
+    var id = $("#select_run").val();
+    var runs = online;
+    var i=0;
+    for (i; i < runs.length; i++) {
+        if (id == JSON.stringify(runs[i].config) ) {
+          active_run = runs[i];
+          graphRadars(runs[i].data,8);
+          graph(runs[i]);
+          showRunInfo(runs[i])
+          //TODO: show legend
+          // document.getElementById('legend').innerHTML = myLineChart.generateLegend();
+        }
+    }
+  });
 </script>
 
 </html>
